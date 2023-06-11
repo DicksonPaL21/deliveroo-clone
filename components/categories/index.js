@@ -1,22 +1,26 @@
-import React from 'react';
-import { ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList } from 'react-native';
 import CategoryCard from './CategoryCard';
+import { getCategories } from '../../sanity';
 
 const Categories = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
+
   return (
-    <ScrollView
+    <FlatList
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 15, paddingTop: 10 }}
-    >
-      {[...Array(10).keys()].map((idx) => (
-        <CategoryCard
-          key={idx}
-          imgUrl={`https://picsum.photos/200/300?random=${idx + 1}`}
-          title="Testing"
-        />
-      ))}
-    </ScrollView>
+      data={categories}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <CategoryCard imgUrl={item.image} title={item.name} />
+      )}
+    />
   );
 };
 

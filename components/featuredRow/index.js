@@ -1,45 +1,46 @@
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList } from 'react-native';
 import { ArrowRightIcon } from 'react-native-heroicons/outline';
 import RestaurantCard from './RestaurantCard';
+import { getFeaturedCategoryById } from '../../sanity';
 
-const FeaturedRow = ({
-  id,
-  title,
-  description,
-  featuredCategory,
-  ...props
-}) => {
+const FeaturedRow = ({ id, title, description, ...props }) => {
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    getFeaturedCategoryById(id).then(({ restaurants }) => {
+      setRestaurants(restaurants);
+    });
+  }, [id]);
+
   return (
-    <View>
+    <View {...props}>
       <View className="flex-row items-center justify-between px-4 mt-4">
         <Text className="font-bold text-lg">{title}</Text>
         <ArrowRightIcon color="#00CCBB" />
       </View>
       <Text className="text-xs text-gray-500 px-4">{description}</Text>
-
-      <ScrollView
+      <FlatList
         horizontal
-        contentContainerStyle={{ paddingHorizontal: 15 }}
         showsHorizontalScrollIndicator={false}
-        className="pt-4"
-      >
-        {[...Array(10).keys()].map((idx) => (
+        contentContainerStyle={{ paddingHorizontal: 15, paddingTop: 16 }}
+        data={restaurants}
+        keyExtractor={(item) => item._id}
+        ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+        renderItem={({ item }) => (
           <RestaurantCard
-            key={idx}
-            id={123}
-            imgUrl={`https://picsum.photos/200/300?random=${idx + 1}`}
-            title="Yo! Sushi"
-            rating={4.5}
-            genre="Japanese"
-            address="123 Main St"
-            shortDescription="This is a test description"
-            dishes={[]}
-            long={20}
-            lat={0}
+            imgUrl={item.image}
+            title={item.name}
+            rating={item.rating}
+            genre={item.type?.name}
+            address={item.address}
+            shortDescription={item.short_description}
+            dishes={item.dishes}
+            long={item.long}
+            lat={item.lat}
           />
-        ))}
-      </ScrollView>
+        )}
+      />
     </View>
   );
 };

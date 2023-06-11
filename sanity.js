@@ -1,15 +1,32 @@
-import sanityClient from '@sanity/client';
+import { createClient } from '@sanity/client';
 import ImageUrlBuilder from '@sanity/image-url';
 
-const client = sanityClient({
+const client = createClient({
   projectId: 'l0hq6mmh',
   dataset: 'production',
   useCdn: true,
-  apiVersion: '2021-10-21',
+  apiVersion: '2023-05-03',
 });
 
-const builder = ImageUrlBuilder(client);
-const urlFor = (source) => builder.image(source);
-
 export default client;
-export { urlFor };
+
+const builder = ImageUrlBuilder(client);
+export const urlFor = (source) =>
+  !!source ? builder.image(source) : undefined;
+
+// '*[_type == "featured"] {..., restaurants[] -> {..., dishes[] ->}}'
+
+export const getCategories = async () => {
+  return await client.fetch('*[_type == "category"]');
+};
+
+export const getFeaturedCategories = async () => {
+  return await client.fetch('*[_type == "featured"]');
+};
+
+export const getFeaturedCategoryById = async (id) => {
+  return await client.fetch(
+    '*[_type == "featured" && _id == $id] {..., restaurants[] -> {..., dishes[] ->, type -> {name}}}[0]',
+    { id }
+  );
+};

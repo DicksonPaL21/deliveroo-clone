@@ -1,5 +1,17 @@
-import React, { useLayoutEffect } from 'react';
-import { Image, ScrollView, Text, TextInput, View } from 'react-native';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -8,11 +20,15 @@ import {
   MagnifyingGlassIcon,
   AdjustmentsVerticalIcon,
 } from 'react-native-heroicons/outline';
+import 'react-native-url-polyfill/auto';
 import Categories from '../../components/categories';
 import FeaturedRow from '../../components/featuredRow';
+import { getFeaturedCategories } from '../../sanity';
 
 const Home = () => {
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
+  const [featuredCategories, setFeaturedCategories] = useState([]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -20,8 +36,22 @@ const Home = () => {
     });
   }, []);
 
+  const fetchData = () => {
+    getFeaturedCategories().then(setFeaturedCategories);
+    setRefreshing(false);
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
-    <SafeAreaView className="bg-white">
+    <SafeAreaView className="bg-white pb-12">
       <View className="flex-row items-center space-x-2 pt-3 pb-3 mx-4">
         <Image
           source={{ uri: 'https://picsum.photos/224' }}
@@ -51,26 +81,19 @@ const Home = () => {
       <ScrollView
         className="bg-gray-100"
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <Categories />
-        <FeaturedRow
-          id="featured"
-          title="Featured"
-          description="Paid placements from our partners"
-          featuredCategory="featured"
-        />
-        <FeaturedRow
-          id="discounts"
-          title="Tasty Discounts"
-          description="Everyone's been enjoying these uicy discounts!"
-          featuredCategory="discounts"
-        />
-        <FeaturedRow
-          id="offers"
-          title="Offers near you!"
-          description="Why not support your local restaurant tonight!"
-          featuredCategory="offers"
-        />
+        {featuredCategories?.map((category) => (
+          <FeaturedRow
+            key={category._id}
+            id={category._id}
+            title={category.name}
+            description={category.short_description}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
