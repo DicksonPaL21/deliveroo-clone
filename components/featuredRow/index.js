@@ -26,6 +26,7 @@ const FeaturedRow = ({
       >
         {[...Array(10).keys()].map((idx) => (
           <RestaurantCard
+            key={idx}
             id={123}
             imgUrl={`https://picsum.photos/200/300?random=${idx + 1}`}
             title="Yo! Sushi"

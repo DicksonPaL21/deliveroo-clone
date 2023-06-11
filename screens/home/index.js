@@ -22,7 +22,7 @@ const Home = () => {
 
   return (
     <SafeAreaView className="bg-white">
-      <View className="flex-row items-center space-x-2 pb-3 mx-4">
+      <View className="flex-row items-center space-x-2 pt-3 pb-3 mx-4">
         <Image
           source={{ uri: 'https://picsum.photos/224' }}
           className="h-8 w-8 bg-gray-300 rounded-full"

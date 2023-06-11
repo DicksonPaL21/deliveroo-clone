@@ -11,6 +11,7 @@ const Categories = () => {
     >
       {[...Array(10).keys()].map((idx) => (
         <CategoryCard
+          key={idx}
           imgUrl={`https://picsum.photos/200/300?random=${idx + 1}`}
           title="Testing"
         />
