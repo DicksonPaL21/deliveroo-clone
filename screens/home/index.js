@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   RefreshControl,
@@ -11,30 +6,22 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   UserIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
   AdjustmentsVerticalIcon,
-} from 'react-native-heroicons/outline';
-import 'react-native-url-polyfill/auto';
-import Categories from '../../components/categories';
-import FeaturedRow from '../../components/featuredRow';
-import { getFeaturedCategories } from '../../sanity';
+} from "react-native-heroicons/outline";
+import "react-native-url-polyfill/auto";
+import Categories from "../../components/categories";
+import FeaturedRow from "../../components/featuredRow";
+import { getFeaturedCategories } from "../../sanity";
 
 const Home = () => {
-  const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [featuredCategories, setFeaturedCategories] = useState([]);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
 
   const fetchData = () => {
     getFeaturedCategories().then(setFeaturedCategories);
@@ -54,7 +41,7 @@ const Home = () => {
     <SafeAreaView className="bg-white pb-12">
       <View className="flex-row items-center space-x-2 pt-3 pb-3 mx-4">
         <Image
-          source={{ uri: 'https://picsum.photos/224' }}
+          source={{ uri: "https://picsum.photos/224" }}
           className="h-8 w-8 bg-gray-300 rounded-full"
         />
         <View className="flex-1">

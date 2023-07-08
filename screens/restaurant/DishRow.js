@@ -11,7 +11,7 @@ import {
   addToBasket,
   removeFromBasket,
   selectBasketItemsById,
-} from '../../redux/reducer/backet';
+} from '../../redux/reducer/basket';
 import Currency from 'react-currency-formatter';
 import colors from 'tailwindcss/colors';
 import { MinusCircleIcon, PlusCircleIcon } from 'react-native-heroicons/solid';

@@ -1,56 +1,41 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { urlFor } from '../../sanity';
-import colors from 'tailwindcss/colors';
-import { StarIcon } from 'react-native-heroicons/solid';
+import React, { useEffect } from "react";
+import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { urlFor } from "../../sanity";
+import colors from "tailwindcss/colors";
+import { StarIcon } from "react-native-heroicons/solid";
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
   MapPinIcon,
   QuestionMarkCircleIcon,
-} from 'react-native-heroicons/outline';
-import DishRow from './DishRow';
-import BasketIcon from './BasketIcon';
+} from "react-native-heroicons/outline";
+import { useDispatch } from "react-redux";
+import { setRestaurant } from "../../redux/reducer/restaurant";
+import DishRow from "./DishRow";
+import BasketBottomSheet from "../../components/basketBottomSheet";
 
 const Restaurant = () => {
-  const {
-    params: {
-      id,
-      imgUrl,
-      title,
-      rating,
-      genre,
-      address,
-      shortDescription,
-      dishes,
-      long,
-      lat,
-    },
-  } = useRoute();
+  const { params } = useRoute();
   const navigation = useNavigation();
-  const sheetRef = useRef(null);
+  const dispatch = useDispatch();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
+  useEffect(() => {
+    dispatch(setRestaurant({ ...params }));
   }, []);
 
-  // variables
-  const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
-
-  // callbacks
-  const handleSheetChange = useCallback((index) => {
-    console.log('handleSheetChange', index);
-  }, []);
-  const handleSnapPress = useCallback((index) => {
-    sheetRef.current?.snapToIndex(index);
-  }, []);
-  const handleClosePress = useCallback(() => {
-    sheetRef.current?.close();
-  }, []);
+  const {
+    id,
+    imgUrl,
+    title,
+    rating,
+    genre,
+    address,
+    shortDescription,
+    dishes,
+    long,
+    lat,
+  } = params;
 
   return (
     <View>
@@ -74,7 +59,7 @@ const Restaurant = () => {
               <View className="flex-row items-center space-x-1">
                 <StarIcon size={22} color={colors.green[500]} opacity={0.5} />
                 <Text className="text-xs text-gray-500">
-                  <Text className="text-green-500">{rating}</Text> &#8226;{' '}
+                  <Text className="text-green-500">{rating}</Text> &#8226;{" "}
                   {genre}
                 </Text>
               </View>
@@ -114,27 +99,7 @@ const Restaurant = () => {
           ))}
         </View>
       </ScrollView>
-      <View
-        style={{
-          flex: 1,
-          paddingTop: 200,
-        }}
-      >
-        <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
-        <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
-        <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
-        <Button title="Close" onPress={() => handleClosePress()} />
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={snapPoints}
-          onChange={handleSheetChange}
-        >
-          <BottomSheetView>
-            <Text>Awesome 🔥</Text>
-          </BottomSheetView>
-        </BottomSheet>
-      </View>
-      <BasketIcon />
+      <BasketBottomSheet />
     </View>
   );
 };
