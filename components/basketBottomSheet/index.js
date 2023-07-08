@@ -1,8 +1,15 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useNavigation } from "@react-navigation/native";
 import { XCircleIcon } from "react-native-heroicons/solid";
+import { TrashIcon } from "react-native-heroicons/outline";
 import { useDispatch, useSelector } from "react-redux";
 import { selectRestaurant } from "../../redux/reducer/restaurant";
 import {
@@ -14,6 +21,7 @@ import Currency from "react-currency-formatter";
 import colors from "tailwindcss/colors";
 import BasketIcon from "./BasketIcon";
 import { urlFor } from "../../sanity";
+import rider from "../../assets/images/delivery.webp";
 
 const BasketBottomSheet = () => {
   const sheetRef = useRef(null);
@@ -21,17 +29,13 @@ const BasketBottomSheet = () => {
   const restaurant = useSelector(selectRestaurant);
   const items = useSelector(selectBasketItems);
   const total = useSelector(selectBasketTotal);
-  const [groupedItemsInBasket, setGroupedItemsInBasket] = useState([]);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const dispatch = useDispatch();
 
-  useMemo(() => {
-    const groupedItems = items.reduce((results, item) => {
-      (results[item.id] = results[item.id] || []).push(item);
-      return results;
-    }, {});
-
-    setGroupedItemsInBasket(groupedItems);
+  useEffect(() => {
+    if (!items?.length) {
+      sheetRef.current?.close();
+    }
   }, [items]);
 
   const snapPoints = useMemo(() => ["70%", "100%"], []);
@@ -73,13 +77,12 @@ const BasketBottomSheet = () => {
               className="absolute bg-gray-100 rounded-full right-5"
               onPress={handleClosePress}
             >
-              <XCircleIcon color="#00CCBB" height={50} width={50} />
+              <XCircleIcon color="#00CCBB" size={50} />
             </TouchableOpacity>
           </View>
           <View className="flex-row items-center bg-white space-x-4 px-4 py-3 my-5">
             <Image
-              // source={{ uri: urlFor(image)?.url() }}
-              source={{ uri: "https://picsum.photos/200/300" }}
+              source={rider}
               className="h-7 w-7 bg-gray-300 p-4 rounded-full"
             />
             <Text className="flex-1">Deliver in 50-75 min</Text>
@@ -91,27 +94,22 @@ const BasketBottomSheet = () => {
             className="divide-y divide-gray-200 mb-5"
             showsVerticalScrollIndicator={false}
           >
-            {Object.entries(groupedItemsInBasket).map(([key, items]) => (
+            {items.map((item) => (
               <View
-                key={key}
+                key={item?.id}
                 className="flex-row items-center bg-white space-x-3 py-2 px-4"
               >
-                <Text className="text-[#00CCBB]">{items.length}x</Text>
+                <Text className="text-[#00CCBB]">{item?.count}x</Text>
                 <Image
-                  source={{ uri: urlFor(items[0]?.image)?.url() }}
+                  source={{ uri: urlFor(item?.image)?.url() }}
                   className="h-12 w-12 rounded-full"
                 />
-                <Text className="flex-1">{items[0]?.name}</Text>
+                <Text className="flex-1">{item?.name}</Text>
                 <Text className="text-gray-600">
-                  <Currency currency="PHP" quantity={items[0]?.price} />
+                  <Currency currency="PHP" quantity={item?.price} />
                 </Text>
-                <TouchableOpacity>
-                  <Text
-                    className="text-[#00CCBB] text-xs"
-                    onPress={() => removeItemById(key)}
-                  >
-                    Remove
-                  </Text>
+                <TouchableOpacity onPress={() => removeItemById(item?.id)}>
+                  <TrashIcon color="#00CCBB" size={22} />
                 </TouchableOpacity>
               </View>
             ))}

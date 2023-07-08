@@ -1,34 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TouchableOpacity,
   View,
   Text,
   Image,
   TouchableWithoutFeedback,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addToBasket,
+  incrementItemCountById,
+  decrementItemCountById,
   removeFromBasket,
-  selectBasketItemsById,
-} from '../../redux/reducer/basket';
-import Currency from 'react-currency-formatter';
-import colors from 'tailwindcss/colors';
-import { MinusCircleIcon, PlusCircleIcon } from 'react-native-heroicons/solid';
-import { urlFor } from '../../sanity';
+  selectBasketItemById,
+} from "../../redux/reducer/basket";
+import Currency from "react-currency-formatter";
+import colors from "tailwindcss/colors";
+import { MinusCircleIcon, PlusCircleIcon } from "react-native-heroicons/solid";
+import { urlFor } from "../../sanity";
 
 const DishRow = ({ id, name, description, price, image }) => {
   const dispatch = useDispatch();
-  const items = useSelector((state) => selectBasketItemsById(state, id));
+  const item = useSelector((state) => selectBasketItemById(state, id));
   const [isPressed, setIsPressed] = useState(false);
 
   const addItemToBasket = () => {
-    dispatch(addToBasket({ id, name, description, price, image }));
+    if (!item) {
+      dispatch(addToBasket({ id, name, description, price, image, count: 1 }));
+      return;
+    }
+    dispatch(incrementItemCountById({ id }));
   };
 
   const removeItemFromBasket = () => {
-    if (!items.length) return;
-    dispatch(removeFromBasket({ id }));
+    if (item?.count === 1) {
+      dispatch(removeFromBasket({ id }));
+      return;
+    }
+    dispatch(decrementItemCountById({ id }));
   };
 
   return (
@@ -36,7 +45,7 @@ const DishRow = ({ id, name, description, price, image }) => {
       <TouchableWithoutFeedback onPress={() => setIsPressed(!isPressed)}>
         <View
           className={`flex-row bg-white border border-gray-200 p-4 ${
-            isPressed && 'border-b-0'
+            isPressed && "border-b-0"
           }`}
         >
           <View className="flex-1 pr-2">
@@ -50,7 +59,7 @@ const DishRow = ({ id, name, description, price, image }) => {
             <Image
               source={{ uri: urlFor(image)?.url() }}
               className="w-20 h-20 bg-gray-300 p-4"
-              style={{ borderWidth: 1, borderColor: '#F3F3F4' }}
+              style={{ borderWidth: 1, borderColor: "#F3F3F4" }}
             />
           </View>
         </View>
@@ -58,13 +67,16 @@ const DishRow = ({ id, name, description, price, image }) => {
       {isPressed && (
         <View className="bg-white px-4">
           <View className="flex-row items-center space-x-2 pb-3">
-            <TouchableOpacity onPress={removeItemFromBasket}>
+            <TouchableOpacity
+              onPress={removeItemFromBasket}
+              disabled={!item?.count}
+            >
               <MinusCircleIcon
                 size={40}
-                color={items.length ? '#00CCBB' : colors.gray[400]}
+                color={item?.count ? "#00CCBB" : colors.gray[400]}
               />
             </TouchableOpacity>
-            <Text>{items.length}</Text>
+            <Text>{item?.count ?? 0}</Text>
             <TouchableOpacity onPress={addItemToBasket}>
               <PlusCircleIcon size={40} color="#00CCBB" />
             </TouchableOpacity>
